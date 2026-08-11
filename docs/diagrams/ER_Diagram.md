@@ -1,46 +1,50 @@
+```mermaid
 erDiagram
 
-    ROLES ||--o{ USERS : has
-    USERS ||--o{ PLANTATIONS : creates
-    TREES ||--o{ PLANTATIONS : planted
-    LOCATIONS ||--o{ PLANTATIONS : contains
-    PLANTATIONS ||--o{ GROWTH_RECORDS : has
+    ROLE ||--o{ USER : has
+    USER ||--o{ PLANTATION : records
+    TREE ||--o{ PLANTATION : planted_as
+    LOCATION ||--o{ PLANTATION : planted_at
+    PLANTATION ||--o{ GROWTH_RECORD : has
 
-    ROLES {
-        int id
+    ROLE {
+        int id PK
         string name
     }
 
-    USERS {
-        int id
+    USER {
+        int id PK
         string name
         string email
         string password
-        int role_id
+        int role_id FK
     }
 
-    TREES {
-        int id
-        string tree_name
+    TREE {
+        int id PK
+        string name
+        string scientific_name
     }
 
-    LOCATIONS {
-        int id
-        string location_name
+    LOCATION {
+        int id PK
+        string name
     }
 
-    PLANTATIONS {
-        int id
-        int user_id
-        int tree_id
-        int location_id
+    PLANTATION {
+        int id PK
+        int user_id FK
+        int tree_id FK
+        int location_id FK
         date planting_date
     }
 
-    GROWTH_RECORDS {
-        int id
-        int plantation_id
+    GROWTH_RECORD {
+        int id PK
+        int plantation_id FK
+        date record_date
         float height
-        date recorded_date
+        string health_status
+        string remarks
     }
-    
+```
