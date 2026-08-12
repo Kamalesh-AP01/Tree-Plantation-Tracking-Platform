@@ -1,48 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard - Tree Plantation Tracking</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
+<div class="dashboard">
 
-<body>
+    <h1>Tree Plantation Tracking Platform</h1>
 
-    <div class="dashboard">
+    <p>Welcome, <strong>{{ user_name }}</strong></p>
 
-        <h1>Tree Plantation Tracking Platform</h1>
-
-        <p>Welcome, <strong>{{ user_name }}</strong></p>
-
-        <div class="summary">
-            <div class="box">
-                <h3>Trees Planted</h3>
-                <p>0</p>
-            </div>
-
-            <div class="box">
-                <h3>College Locations</h3>
-                <p>5</p>
-            </div>
-
-            <div class="box">
-                <h3>Total Users</h3>
-                <p>1</p>
-            </div>
+    <div class="summary">
+        <div class="box">
+            <h3>Trees Planted</h3>
+            <p>{{ trees_planted }}</p>
         </div>
 
-        <h2>Plantation Locations</h2>
+        <div class="box">
+            <h3>College Locations</h3>
+            <p>{{ total_locations }}</p>
+        </div>
 
-        <ul>
-            <li>Backside Canteen</li>
-            <li>PT Ground</li>
-            <li>Backside Cafe</li>
-            <li>Hostel Boys Area</li>
-            <li>Hostel Girls Area</li>
-        </ul>
-
-        <button>Plant a Tree</button>
-
+        <div class="box">
+            <h3>Total Users</h3>
+            <p>{{ total_users }}</p>
+        </div>
     </div>
 
-</body>
-</html>
+    <h2>Plantation Locations</h2>
+
+    <ul>
+        <li>Backside Canteen</li>
+        <li>PT Ground</li>
+        <li>Backside Cafe</li>
+        <li>Hostel Boys Area</li>
+        <li>Hostel Girls Area</li>
+    </ul>
+
+    <a href="/plant-tree">
+        <button type="button">Plant a Tree</button>
+    </a>
+
+</div>
