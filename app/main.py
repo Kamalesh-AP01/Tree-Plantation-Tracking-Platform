@@ -1,8 +1,8 @@
 from datetime import date
 
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from passlib.context import CryptContext
 
@@ -16,6 +16,7 @@ from app.models import (
     growth_record,
 )
 
+
 # =========================================================
 # CREATE FASTAPI APPLICATION
 # =========================================================
@@ -26,9 +27,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
 # =========================================================
 # CORS
-# Allows React frontend to communicate with FastAPI
 # =========================================================
 
 app.add_middleware(
@@ -42,6 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # =========================================================
 # SESSION SUPPORT
 # =========================================================
@@ -53,11 +55,13 @@ app.add_middleware(
     https_only=False,
 )
 
+
 # =========================================================
 # CREATE DATABASE TABLES
 # =========================================================
 
 Base.metadata.create_all(bind=engine)
+
 
 # =========================================================
 # PASSWORD HASHING
@@ -68,6 +72,7 @@ pwd_context = CryptContext(
     deprecated="auto",
 )
 
+
 # =========================================================
 # ROOT / API CHECK
 # =========================================================
@@ -77,6 +82,17 @@ def home():
     return {
         "message": "Tree Plantation Tracking Platform API is running",
         "status": "success",
+    }
+
+
+# =========================================================
+# HEALTH CHECK
+# =========================================================
+
+@app.get("/health")
+def health():
+    return {
+        "status": "OK"
     }
 
 
@@ -301,14 +317,21 @@ def plant_tree(
             status_code=401,
         )
 
+    # Admin and User can plant trees
+    if request.session.get("role_id") not in [1, 2]:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "You do not have permission to plant trees",
+            },
+            status_code=403,
+        )
+
     db = SessionLocal()
 
     try:
 
-        # -------------------------------------------------
         # Check whether the tree already exists
-        # -------------------------------------------------
-
         existing_tree = (
             db.query(tree.Tree)
             .filter(tree.Tree.tree_name == tree_name)
@@ -327,10 +350,7 @@ def plant_tree(
             db.commit()
             db.refresh(tree_data)
 
-        # -------------------------------------------------
         # Create plantation record
-        # -------------------------------------------------
-
         plantation_data = plantation.Plantation(
             user_id=request.session["user_id"],
             tree_id=tree_data.id,
@@ -421,6 +441,7 @@ def dashboard(request: Request):
             "trees_planted": total_trees,
             "total_users": total_users,
             "total_locations": total_locations,
+            "role_id": request.session.get("role_id"),
         }
 
     finally:
@@ -507,6 +528,55 @@ def get_plantations(request: Request):
         return {
             "success": True,
             "plantations": result,
+        }
+
+    finally:
+        db.close()
+
+
+# =========================================================
+# ADMIN - GET ALL USERS
+# =========================================================
+
+@app.get("/admin/users")
+def admin_users(request: Request):
+
+    # Check login
+    if "user_id" not in request.session:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Please login first",
+            },
+            status_code=401,
+        )
+
+    # Only Admin can access this endpoint
+    if request.session.get("role_id") != 1:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Admin access required",
+            },
+            status_code=403,
+        )
+
+    db = SessionLocal()
+
+    try:
+        users = db.query(user.User).all()
+
+        return {
+            "success": True,
+            "users": [
+                {
+                    "id": item.id,
+                    "name": item.name,
+                    "email": item.email,
+                    "role_id": item.role_id,
+                }
+                for item in users
+            ],
         }
 
     finally:
