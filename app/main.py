@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
@@ -16,7 +16,6 @@ from app.models import (
     growth_record,
 )
 
-
 # =========================================================
 # CREATE FASTAPI APPLICATION
 # =========================================================
@@ -26,7 +25,6 @@ app = FastAPI(
     description="Backend API for tracking tree plantations",
     version="1.0.0",
 )
-
 
 # =========================================================
 # CORS
@@ -44,7 +42,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # =========================================================
 # SESSION SUPPORT
 # =========================================================
@@ -52,15 +49,15 @@ app.add_middleware(
 app.add_middleware(
     SessionMiddleware,
     secret_key="tree-plantation-secret-key",
+    same_site="lax",
+    https_only=False,
 )
-
 
 # =========================================================
 # CREATE DATABASE TABLES
 # =========================================================
 
 Base.metadata.create_all(bind=engine)
-
 
 # =========================================================
 # PASSWORD HASHING
@@ -70,7 +67,6 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
 )
-
 
 # =========================================================
 # ROOT / API CHECK
@@ -82,6 +78,88 @@ def home():
         "message": "Tree Plantation Tracking Platform API is running",
         "status": "success",
     }
+
+
+# =========================================================
+# REGISTER USER
+# =========================================================
+
+@app.post("/register")
+def register(
+    name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+):
+    db = SessionLocal()
+
+    try:
+        # Check whether email already exists
+        existing_user = (
+            db.query(user.User)
+            .filter(user.User.email == email)
+            .first()
+        )
+
+        if existing_user:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Email already registered",
+                },
+                status_code=400,
+            )
+
+        # Find the normal User role
+        user_role = (
+            db.query(role.Role)
+            .filter(role.Role.name == "User")
+            .first()
+        )
+
+        if not user_role:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "User role not found",
+                },
+                status_code=500,
+            )
+
+        # Hash password
+        hashed_password = pwd_context.hash(password)
+
+        # Create new user
+        new_user = user.User(
+            name=name,
+            email=email,
+            password=hashed_password,
+            role_id=user_role.id,
+        )
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        return {
+            "success": True,
+            "message": "Registration successful",
+            "user_id": new_user.id,
+        }
+
+    except Exception as error:
+        db.rollback()
+
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Registration failed",
+                "error": str(error),
+            },
+            status_code=500,
+        )
+
+    finally:
+        db.close()
 
 
 # =========================================================
@@ -111,6 +189,7 @@ def login(
             # Store login information in session
             request.session["user_id"] = user_data.id
             request.session["user_name"] = user_data.name
+            request.session["role_id"] = user_data.role_id
 
             return JSONResponse(
                 content={
@@ -118,6 +197,7 @@ def login(
                     "message": "Login successful",
                     "user_id": user_data.id,
                     "user_name": user_data.name,
+                    "role_id": user_data.role_id,
                 }
             )
 
@@ -167,6 +247,7 @@ def get_current_user(request: Request):
         "logged_in": True,
         "user_id": request.session.get("user_id"),
         "user_name": request.session.get("user_name"),
+        "role_id": request.session.get("role_id"),
     }
 
 

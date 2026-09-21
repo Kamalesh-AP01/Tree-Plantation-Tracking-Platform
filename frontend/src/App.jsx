@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Dashboard from "./Dashboard";
+import Register from "./Register";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -10,6 +11,7 @@ function App() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ function App() {
 
       console.log(response.data);
 
-      setLoggedIn(true);  
+      setLoggedIn(true);
 
     } catch (error) {
       console.error(error);
@@ -58,11 +60,25 @@ function App() {
     }
   };
 
-if (loggedIn) {
-  return <Dashboard />;
-}
+  // Show Dashboard after login
+  if (loggedIn) {
+    return <Dashboard />;
+  }
 
-return (
+  // Show Registration page
+  if (showRegister) {
+    return (
+      <Register
+        onBackToLogin={() => {
+          setShowRegister(false);
+          setMessage("");
+        }}
+      />
+    );
+  }
+
+  // Login page
+  return (
     <div
       className="min-vh-100 d-flex justify-content-center align-items-center"
       style={{
@@ -158,6 +174,26 @@ return (
             </button>
 
           </form>
+
+          {/* Register Button */}
+          <div className="text-center mt-4">
+
+            <p className="text-muted mb-2">
+              New student?
+            </p>
+
+            <button
+              type="button"
+              className="btn btn-outline-success"
+              onClick={() => {
+                setShowRegister(true);
+                setMessage("");
+              }}
+            >
+              Create User Account
+            </button>
+
+          </div>
 
           {/* Message */}
           {message && (

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Plant a Tree</title>
+
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
@@ -9,60 +13,107 @@
 
     <div class="dashboard">
 
-        <h1>Plant a Tree</h1>
+        <h1>Plant a Tree 🌱</h1>
 
-        <p>Welcome, <strong>{{ user_name }}</strong></p>
+        <p>
+            Welcome, <strong>{{ user_name }}</strong>
+        </p>
 
         <form action="/plant-tree" method="post">
 
-            <label for="tree_name">Tree Name</label>
-            <input
-                type="text"
-                id="tree_name"
-                name="tree_name"
-                placeholder="Enter tree name"
-                required
-            >
+            <!-- Tree Name -->
+            <div class="box">
+                <label for="tree_name">
+                    <strong>Tree Name</strong>
+                </label>
 
-            <br><br>
+                <br><br>
 
-            <label for="location_id">Location</label>
+                <input
+                    type="text"
+                    id="tree_name"
+                    name="tree_name"
+                    placeholder="Enter tree name"
+                    required
+                >
+            </div>
 
-            <select
-                id="location_id"
-                name="location_id"
-                required
-            >
-                <option value="">Select Location</option>
 
-                {% for location in locations %}
-                    <option value="{{ location.id }}">
-                        {{ location.location_name }}
+            <br>
+
+
+            <!-- Location -->
+            <div class="box">
+
+                <label for="location_id">
+                    <strong>Select Location</strong>
+                </label>
+
+                <br><br>
+
+                <select
+                    id="location_id"
+                    name="location_id"
+                    required
+                >
+
+                    <option value="">
+                        Select Location
                     </option>
-                {% endfor %}
 
-            </select>
+                    {% for location in locations %}
 
-            <br><br>
+                        <option value="{{ location.id }}">
+                            {{ location.location_name }}
+                        </option>
 
-            <label for="planting_date">Planting Date</label>
+                    {% endfor %}
 
-            <input
-                type="date"
-                id="planting_date"
-                name="planting_date"
-                required
-            >
+                </select>
 
-            <br><br>
+            </div>
 
+
+            <br>
+
+
+            <!-- Planting Date -->
+            <div class="box">
+
+                <label for="planting_date">
+                    <strong>Planting Date</strong>
+                </label>
+
+                <br><br>
+
+                <input
+                    type="date"
+                    id="planting_date"
+                    name="planting_date"
+                    required
+                >
+
+            </div>
+
+
+            <br>
+
+
+            <!-- Submit -->
             <button type="submit">
-                Plant Tree
+                🌱 Plant Tree
             </button>
 
         </form>
 
+
+        <br>
+
+        <a href="/dashboard">
+            ← Back to Dashboard
+        </a>
+
     </div>
 
 </body>
-</html>
+</html> 
