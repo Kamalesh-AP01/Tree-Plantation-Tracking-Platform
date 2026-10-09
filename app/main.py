@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from datetime import date
 
 from fastapi import FastAPI, Request, Form
@@ -20,7 +22,7 @@ from app.models import (
 # =========================================================
 # CREATE FASTAPI APPLICATION
 # =========================================================
-
+load_dotenv()
 app = FastAPI(
     title="Tree Plantation Tracking Platform",
     description="Backend API for tracking tree plantations",
@@ -48,11 +50,18 @@ app.add_middleware(
 # SESSION SUPPORT
 # =========================================================
 
+SESSION_SECRET = os.getenv("SESSION_SECRET")
+
+if not SESSION_SECRET:
+    raise RuntimeError("SESSION_SECRET is missing from environment variables")
+
+IS_PRODUCTION = os.getenv("ENVIRONMENT", "development").lower() == "production"
+
 app.add_middleware(
     SessionMiddleware,
-    secret_key="tree-plantation-secret-key",
+    secret_key=SESSION_SECRET,
     same_site="lax",
-    https_only=False,
+    https_only=IS_PRODUCTION,
 )
 
 
