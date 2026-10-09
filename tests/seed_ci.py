@@ -1,4 +1,10 @@
 
+import sys
+from pathlib import Path
+
+# Add the project root so Python can find the app package.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from passlib.context import CryptContext
 
 import app.main
@@ -16,6 +22,7 @@ pwd_context = CryptContext(
 db = SessionLocal()
 
 try:
+    # Create the Admin role if it does not exist.
     admin_role = (
         db.query(Role)
         .filter(Role.name == "Admin")
@@ -28,6 +35,7 @@ try:
         db.commit()
         db.refresh(admin_role)
 
+    # Create the User role if it does not exist.
     user_role = (
         db.query(Role)
         .filter(Role.name == "User")
@@ -40,6 +48,7 @@ try:
         db.commit()
         db.refresh(user_role)
 
+    # Test accounts used by the automated tests.
     test_users = [
         (
             "College Admin",
@@ -55,6 +64,7 @@ try:
         ),
     ]
 
+    # Create the test accounts or update existing ones.
     for name, email, password, role_id in test_users:
         existing_user = (
             db.query(User)
@@ -76,6 +86,7 @@ try:
             existing_user.role_id = role_id
 
     db.commit()
+
     print("GitHub Actions test data prepared successfully.")
 
 finally:
