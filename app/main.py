@@ -69,7 +69,7 @@ IS_PRODUCTION = (
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
-    same_site="lax",
+    same_site="none" if IS_PRODUCTION else "lax",
     https_only=IS_PRODUCTION,
 )
 
