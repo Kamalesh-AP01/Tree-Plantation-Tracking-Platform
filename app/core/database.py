@@ -19,7 +19,12 @@ if DATABASE_URL.startswith("postgresql://"):
         "postgresql://", "postgresql+psycopg2://", 1
     )
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    connect_args={"connect_timeout": 10},
+)
 
 SessionLocal = sessionmaker(
     autocommit=False,
