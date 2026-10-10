@@ -1,3 +1,4 @@
+
 import os
 from dotenv import load_dotenv
 from datetime import date
@@ -22,7 +23,9 @@ from app.models import (
 # =========================================================
 # CREATE FASTAPI APPLICATION
 # =========================================================
+
 load_dotenv()
+
 app = FastAPI(
     title="Tree Plantation Tracking Platform",
     description="Backend API for tracking tree plantations",
@@ -39,6 +42,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://tree-plantation-frontend.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -53,9 +57,14 @@ app.add_middleware(
 SESSION_SECRET = os.getenv("SESSION_SECRET")
 
 if not SESSION_SECRET:
-    raise RuntimeError("SESSION_SECRET is missing from environment variables")
+    raise RuntimeError(
+        "SESSION_SECRET is missing from environment variables"
+    )
 
-IS_PRODUCTION = os.getenv("ENVIRONMENT", "development").lower() == "production"
+IS_PRODUCTION = (
+    os.getenv("ENVIRONMENT", "development").lower()
+    == "production"
+)
 
 app.add_middleware(
     SessionMiddleware,
@@ -100,9 +109,7 @@ def home():
 
 @app.get("/health")
 def health():
-    return {
-        "status": "OK"
-    }
+    return {"status": "OK"}
 
 
 # =========================================================
@@ -118,7 +125,6 @@ def register(
     db = SessionLocal()
 
     try:
-        # Check whether email already exists
         existing_user = (
             db.query(user.User)
             .filter(user.User.email == email)
@@ -134,7 +140,6 @@ def register(
                 status_code=400,
             )
 
-        # Find the normal User role
         user_role = (
             db.query(role.Role)
             .filter(role.Role.name == "User")
@@ -150,10 +155,8 @@ def register(
                 status_code=500,
             )
 
-        # Hash password
         hashed_password = pwd_context.hash(password)
 
-        # Create new user
         new_user = user.User(
             name=name,
             email=email,
@@ -206,12 +209,10 @@ def login(
             .first()
         )
 
-        # Check user and password
         if user_data and pwd_context.verify(
             password,
             user_data.password,
         ):
-            # Store login information in session
             request.session["user_id"] = user_data.id
             request.session["user_name"] = user_data.name
             request.session["role_id"] = user_data.role_id
@@ -258,7 +259,6 @@ def logout(request: Request):
 
 @app.get("/me")
 def get_current_user(request: Request):
-
     if "user_id" not in request.session:
         return JSONResponse(
             content={
@@ -282,7 +282,6 @@ def get_current_user(request: Request):
 
 @app.get("/locations")
 def get_locations():
-
     db = SessionLocal()
 
     try:
@@ -315,8 +314,6 @@ def plant_tree(
     location_id: int = Form(...),
     planting_date: str = Form(...),
 ):
-
-    # Check login
     if "user_id" not in request.session:
         return JSONResponse(
             content={
@@ -326,7 +323,6 @@ def plant_tree(
             status_code=401,
         )
 
-    # Admin and User can plant trees
     if request.session.get("role_id") not in [1, 2]:
         return JSONResponse(
             content={
@@ -339,8 +335,6 @@ def plant_tree(
     db = SessionLocal()
 
     try:
-
-        # Check whether the tree already exists
         existing_tree = (
             db.query(tree.Tree)
             .filter(tree.Tree.tree_name == tree_name)
@@ -349,17 +343,12 @@ def plant_tree(
 
         if existing_tree:
             tree_data = existing_tree
-
         else:
-            tree_data = tree.Tree(
-                tree_name=tree_name
-            )
-
+            tree_data = tree.Tree(tree_name=tree_name)
             db.add(tree_data)
             db.commit()
             db.refresh(tree_data)
 
-        # Create plantation record
         plantation_data = plantation.Plantation(
             user_id=request.session["user_id"],
             tree_id=tree_data.id,
@@ -411,8 +400,6 @@ def plant_tree(
 
 @app.get("/dashboard")
 def dashboard(request: Request):
-
-    # Check login
     if "user_id" not in request.session:
         return JSONResponse(
             content={
@@ -425,24 +412,9 @@ def dashboard(request: Request):
     db = SessionLocal()
 
     try:
-
-        # Total plantations / trees planted
-        total_trees = (
-            db.query(plantation.Plantation)
-            .count()
-        )
-
-        # Total users
-        total_users = (
-            db.query(user.User)
-            .count()
-        )
-
-        # Total locations
-        total_locations = (
-            db.query(location_model.Location)
-            .count()
-        )
+        total_trees = db.query(plantation.Plantation).count()
+        total_users = db.query(user.User).count()
+        total_locations = db.query(location_model.Location).count()
 
         return {
             "success": True,
@@ -463,7 +435,6 @@ def dashboard(request: Request):
 
 @app.get("/plantations")
 def get_plantations(request: Request):
-
     if "user_id" not in request.session:
         return JSONResponse(
             content={
@@ -476,19 +447,15 @@ def get_plantations(request: Request):
     db = SessionLocal()
 
     try:
-
-        plantations = (
+        plantation_records = (
             db.query(plantation.Plantation)
-            .order_by(
-                plantation.Plantation.id.desc()
-            )
+            .order_by(plantation.Plantation.id.desc())
             .all()
         )
 
         result = []
 
-        for record in plantations:
-
+        for record in plantation_records:
             tree_data = (
                 db.query(tree.Tree)
                 .filter(tree.Tree.id == record.tree_id)
@@ -498,8 +465,7 @@ def get_plantations(request: Request):
             location_data = (
                 db.query(location_model.Location)
                 .filter(
-                    location_model.Location.id
-                    == record.location_id
+                    location_model.Location.id == record.location_id
                 )
                 .first()
             )
@@ -515,22 +481,17 @@ def get_plantations(request: Request):
                     "id": record.id,
                     "tree_name": (
                         tree_data.tree_name
-                        if tree_data
-                        else "Unknown"
+                        if tree_data else "Unknown"
                     ),
                     "location": (
                         location_data.location_name
-                        if location_data
-                        else "Unknown"
+                        if location_data else "Unknown"
                     ),
                     "planted_by": (
                         user_data.name
-                        if user_data
-                        else "Unknown"
+                        if user_data else "Unknown"
                     ),
-                    "planting_date": str(
-                        record.planting_date
-                    ),
+                    "planting_date": str(record.planting_date),
                 }
             )
 
@@ -549,8 +510,6 @@ def get_plantations(request: Request):
 
 @app.get("/admin/users")
 def admin_users(request: Request):
-
-    # Check login
     if "user_id" not in request.session:
         return JSONResponse(
             content={
@@ -560,7 +519,6 @@ def admin_users(request: Request):
             status_code=401,
         )
 
-    # Only Admin can access this endpoint
     if request.session.get("role_id") != 1:
         return JSONResponse(
             content={
