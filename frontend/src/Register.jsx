@@ -1,3 +1,4 @@
+```jsx
 import { useState } from "react";
 import axios from "axios";
 
@@ -20,7 +21,7 @@ function Register({ onBackToLogin }) {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/register",
+        "https://tree-plantation-api.onrender.com/register",
         formData,
         {
           headers: {
@@ -34,7 +35,6 @@ function Register({ onBackToLogin }) {
       setName("");
       setEmail("");
       setPassword("");
-
     } catch (error) {
       console.error(error);
 
@@ -53,7 +53,6 @@ function Register({ onBackToLogin }) {
       <h2>Create User Account</h2>
 
       <form onSubmit={handleRegister}>
-
         <div className="mb-3">
           <label>Name</label>
 
@@ -90,13 +89,9 @@ function Register({ onBackToLogin }) {
           />
         </div>
 
-        <button
-          type="submit"
-          className="btn btn-success"
-        >
+        <button type="submit" className="btn btn-success">
           Register
         </button>
-
       </form>
 
       {message && (
@@ -117,3 +112,4 @@ function Register({ onBackToLogin }) {
 }
 
 export default Register;
+```

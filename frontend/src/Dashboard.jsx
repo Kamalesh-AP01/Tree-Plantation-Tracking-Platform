@@ -1,7 +1,10 @@
+
 import { useEffect, useState } from "react";
 import PlantTree from "./PlantTree";
 import PlantationRecords from "./PlantationRecords";
 import axios from "axios";
+
+const API_URL = "https://tree-plantation-api.onrender.com";
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
@@ -12,13 +15,14 @@ function Dashboard() {
     const getDashboard = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/dashboard",
+          `${API_URL}/dashboard`,
           {
             withCredentials: true,
           }
         );
 
         setDashboard(response.data);
+        setError("");
       } catch (error) {
         console.error(error);
         setError("Unable to load dashboard.");
@@ -48,7 +52,6 @@ function Dashboard() {
 
   return (
     <div style={{ padding: "40px" }}>
-
       <h1>Tree Plantation Tracking Platform</h1>
 
       <p>
@@ -62,7 +65,6 @@ function Dashboard() {
           marginTop: "30px",
         }}
       >
-
         <div className="card p-4">
           <h3>Trees Planted</h3>
           <p>{dashboard.trees_planted}</p>
@@ -77,7 +79,6 @@ function Dashboard() {
           <h3>Total Users</h3>
           <p>{dashboard.total_users}</p>
         </div>
-
       </div>
 
       <h2 className="mt-5">Plantation Locations</h2>
@@ -98,7 +99,6 @@ function Dashboard() {
       >
         🌱 Plant a Tree
       </button>
-
     </div>
   );
 }

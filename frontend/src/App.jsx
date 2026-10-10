@@ -5,6 +5,8 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
+const API_URL = "https://tree-plantation-api.onrender.com";
+
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,14 +22,13 @@ function App() {
     setLoading(true);
 
     try {
-      // FastAPI expects Form data
       const formData = new URLSearchParams();
 
       formData.append("email", email);
       formData.append("password", password);
 
       const response = await axios.post(
-        "http://localhost:8000/login",
+        `${API_URL}/login`,
         formData,
         {
           headers: {
@@ -38,34 +39,27 @@ function App() {
       );
 
       console.log(response.data);
-
       setLoggedIn(true);
-
     } catch (error) {
       console.error(error);
 
       if (error.response) {
         setMessage(
           error.response.data?.message ||
-          "Invalid email or password"
+            "Invalid email or password"
         );
       } else {
-        setMessage(
-          "Cannot connect to the backend."
-        );
+        setMessage("Cannot connect to the backend.");
       }
-
     } finally {
       setLoading(false);
     }
   };
 
-  // Show Dashboard after login
   if (loggedIn) {
     return <Dashboard />;
   }
 
-  // Show Registration page
   if (showRegister) {
     return (
       <Register
@@ -77,7 +71,6 @@ function App() {
     );
   }
 
-  // Login page
   return (
     <div
       className="min-vh-100 d-flex justify-content-center align-items-center"
@@ -94,10 +87,7 @@ function App() {
         }}
       >
         <div className="card-body p-5">
-
-          {/* Logo */}
           <div className="text-center mb-4">
-
             <div
               style={{
                 fontSize: "55px",
@@ -118,15 +108,10 @@ function App() {
             <p className="text-muted mt-3">
               College Admin Login
             </p>
-
           </div>
 
-          {/* Login Form */}
           <form onSubmit={handleLogin}>
-
-            {/* Email */}
             <div className="mb-3">
-
               <label className="form-label fw-semibold">
                 Email
               </label>
@@ -136,17 +121,12 @@ function App() {
                 className="form-control form-control-lg"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-
             </div>
 
-            {/* Password */}
             <div className="mb-4">
-
               <label className="form-label fw-semibold">
                 Password
               </label>
@@ -156,15 +136,11 @@ function App() {
                 className="form-control form-control-lg"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
-
             </div>
 
-            {/* Login Button */}
             <button
               type="submit"
               className="btn btn-success btn-lg w-100"
@@ -172,12 +148,9 @@ function App() {
             >
               {loading ? "Logging in..." : "Login"}
             </button>
-
           </form>
 
-          {/* Register Button */}
           <div className="text-center mt-4">
-
             <p className="text-muted mb-2">
               New student?
             </p>
@@ -192,16 +165,13 @@ function App() {
             >
               Create User Account
             </button>
-
           </div>
 
-          {/* Message */}
           {message && (
             <div className="alert alert-info mt-4 text-center">
               {message}
             </div>
           )}
-
         </div>
       </div>
     </div>

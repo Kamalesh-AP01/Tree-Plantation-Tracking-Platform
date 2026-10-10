@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_URL = "https://tree-plantation-api.onrender.com";
+
 function PlantTree({ onBack }) {
   const [treeName, setTreeName] = useState("");
   const [locationId, setLocationId] = useState("");
@@ -12,7 +14,7 @@ function PlantTree({ onBack }) {
     const getLocations = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/locations",
+          `${API_URL}/locations`,
           {
             withCredentials: true,
           }
@@ -41,7 +43,7 @@ function PlantTree({ onBack }) {
       formData.append("planting_date", plantingDate);
 
       const response = await axios.post(
-        "http://localhost:8000/plant-tree",
+        `${API_URL}/plant-tree`,
         formData,
         {
           headers: {
@@ -61,7 +63,7 @@ function PlantTree({ onBack }) {
 
       setMessage(
         error.response?.data?.message ||
-        "Unable to plant tree."
+          "Unable to plant tree."
       );
     }
   };
@@ -74,7 +76,6 @@ function PlantTree({ onBack }) {
         </h1>
 
         <form onSubmit={handlePlantTree}>
-
           <div className="mb-3">
             <label className="form-label">
               Tree Name
@@ -136,23 +137,22 @@ function PlantTree({ onBack }) {
           >
             🌳 Plant Tree
           </button>
-
         </form>
 
         {message && (
-  <div className="alert alert-info mt-4">
-    {message}
-  </div>
-)}
+          <div className="alert alert-info mt-4">
+            {message}
+          </div>
+        )}
 
-{message === "Tree planted successfully!" && (
-  <button
-    className="btn btn-primary mt-3"
-    onClick={onBack}
-  >
-    ← Back to Dashboard
-  </button>
-)}
+        {message === "Tree planted successfully!" && (
+          <button
+            className="btn btn-primary mt-3"
+            onClick={onBack}
+          >
+            ← Back to Dashboard
+          </button>
+        )}
       </div>
     </div>
   );
